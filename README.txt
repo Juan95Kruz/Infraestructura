@@ -14,7 +14,7 @@ Este proyecto tiene como objetivo desplegar una página web estática en Minikub
 ### 1. Clonar los repositorios
 
 Para comenzar, necesitamos clonar dos repositorios: uno que contiene el contenido de la página web estática y otro con los manifiestos de Kubernetes.
-Primero, clonar el repositorio principal del proyecto dentro de una carpeta para estar mas organizados:
+Creamos una carpeta en donde clonaremos los repos, accedemos a esa carpeta y clonamos.
 
 mkdir ~/Trabajo-Cloud
 cd Trabajo-Cloud
@@ -22,7 +22,7 @@ git clone https://github.com/Juan95Kruz/static-website.git
 git clone https://github.com/Juan95Kruz/Infraestructura.git
 
 
-La estructura de tus carpetas debería verse algo así:
+La estructura de las carpetas debería verse algo así:
 
 
 /home/kruz/Trabajo-Cloud
@@ -55,7 +55,7 @@ La estructura de tus carpetas debería verse algo así:
 
 ### 2. Iniciar Minikube con el montaje del directorio
 
-A continuación, debes iniciar Minikube con el driver Docker y montar la carpeta donde se encuentra el contenido estático de tu página web. Asegúrate de sustituir `kruz` con el nombre de la carpeta que hayas elegido, por ejemplo:
+A continuación, se debe iniciar Minikube con el driver Docker y montar la carpeta donde se encuentra el contenido estático de tu página web. Asegúrate de sustituir `kruz` con el nombre de la carpeta que se haya elegido, por ejemplo:
 
 
 minikube start --driver=docker --mount --mount-string="/home/kruz/Trabajo-Cloud/static-website:/mnt/web"
@@ -79,18 +79,18 @@ Este paso configura los volúmenes persistentes, el despliegue de los pods con N
 
 ### 4. Verificar los recursos desplegados
 
-Para asegurarte de que todo esté funcionando correctamente, puedes verificar el estado de los pods y los servicios con los siguientes comandos:
+Para asegurarte de que todo esté funcionando correctamente, se puede verificar el estado de los pods y los servicios con los siguientes comandos:
 
 
 kubectl get pods
 kubectl get services
 
 
-Verifica que los pods estén en estado `Running` y que el servicio esté correctamente expuesto.
+Verificar que los pods estén en estado `Running` y que el servicio esté correctamente expuesto.
 
 ### 5. Habilitar Ingress
 
-Si aún no has habilitado el addon de Ingress en Minikube, hazlo con el siguiente comando:
+Si aún no ha habilitado el addon de Ingress en Minikube, hazlo con el siguiente comando:
 
 
 minikube addons enable ingress
@@ -106,23 +106,23 @@ Este comando habilita el controlador de Ingress necesario para enrutar las solic
 
 ### 6. Configurar el archivo `/etc/hosts`
 
-Una vez que Ingress esté configurado y los servicios estén corriendo, vamos a añadir una entrada en el archivo `/etc/hosts` para que puedas acceder a la página usando un nombre de dominio personalizado. Para ello, ejecuta el siguiente comando:
+Una vez que Ingress esté configurado y los servicios estén corriendo, vamos a añadir una entrada en el archivo `/etc/hosts` para que se pueda acceder a la página usando un nombre de dominio personalizado. Para ello, se ejecuta el siguiente comando:
 
 
 echo "$(minikube ip) sitio.local" | sudo tee -a /etc/hosts
 
 
-Este comando obtiene la IP de Minikube y la vincula al dominio `sitio.local` en tu archivo `/etc/hosts`. De esta manera, podrás acceder a la aplicación en el navegador usando `sitio.local` en lugar de la IP directa de Minikube.
+Este comando obtiene la IP de Minikube y la vincula al dominio `sitio.local` en el archivo `/etc/hosts`. De esta manera, que se podrá acceder a la aplicación en el navegador usando `sitio.local` en lugar de la IP directa de Minikube.
 
 ### 7. Acceder a la página web
 
-Una vez realizado todo lo anterior, abre tu navegador y accede a la página web estática a través de la URL:
+Una vez realizado todo lo anterior, se abre el navegador para que copiar esta url y pegarla:
 
 
 http://sitio.local/
 
 
-Deberías ver la página web servida por Nginx, con el contenido que hayas colocado en la carpeta `static-website`.
+Ahora se tendría que ver la página web servida por Nginx, con el contenido que haya en la carpeta `static-website`.
 
 
 
