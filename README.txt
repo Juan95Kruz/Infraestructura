@@ -116,7 +116,7 @@ Este comando obtiene la IP de Minikube y la vincula al dominio `sitio.local` en 
 
 ### 7. Acceder a la página web
 
-Una vez realizado todo lo anterior, se abre el navegador para que copiar esta url y pegarla:
+Una vez realizado todo lo anterior, abre el navegador para que copiar esta url y pegarla:
 
 
 http://sitio.local/
