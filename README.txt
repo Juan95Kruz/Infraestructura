@@ -19,30 +19,38 @@ Primero, clonar el repositorio principal del proyecto dentro de una carpeta para
 mkdir ~/Trabajo-Cloud
 cd Trabajo-Cloud
 git clone https://github.com/Juan95Kruz/static-website.git
-git clone https://github.com/Juan95Kruz/k8s-manifiestos.git
+git clone https://github.com/Juan95Kruz/Infraestructura
 
 
 La estructura de tus carpetas debería verse algo así:
 
 
 /home/kruz/Trabajo-Cloud
-├── k8s-manifiestos
-│   ├── deployment
-│   │   └── deployment.yaml
-│   ├── ingress
-│   │   └── ingress.yaml
-│   ├── service
-│   │   └── service.yaml
-│   └── volumenes
-│       ├── pvc.yaml
-│       └── pv.yaml
+├── Infraestructura
+│   ├── k8s-manifiestos
+│   │   ├── deployment
+│   │   │   └── deployment.yaml
+│   │   ├── ingress
+│   │   │   └── ingress.yaml
+│   │   ├── service
+│   │   │   └── service.yaml
+│   │   └── volumenes
+│   │       ├── pvc.yaml
+│   │       └── pv.yaml
+│   └── README.txt
 └── static-website
     ├── assets
-    │   ├── banner-bg.jpg
-    │   ├── banner-texture@2x.png
-    │   └── logo-new.png
+    │   ├── banner-bg.jpg
+    │   ├── banner-texture@2x.png
+    │   ├── banner-texture.png
+    │   ├── DSC_0036.JPG
+    │   ├── img-banner@2x.png
+    │   ├── img-contact-form-bg.jpg
+    │   ├── img-prop-type@2x.jpg
+    │   └── logo-new.png
     ├── index.html
     └── style.css
+
 
 
 ### 2. Iniciar Minikube con el montaje del directorio
@@ -60,11 +68,11 @@ Este comando inicia Minikube y monta el directorio local donde está la página 
 Una vez que Minikube esté corriendo, debemos aplicar los archivos YAML que contienen la configuración de los recursos de Kubernetes. Estos archivos definen el despliegue, el servicio y los volúmenes persistentes. Ejecuta los siguientes comandos para aplicar todos los manifiestos:
 
 cd
-kubectl apply -f /home/kruz/Trabajo-Cloud/k8s-manifiestos/volumenes/pv.yaml
-kubectl apply -f /home/kruz/Trabajo-Cloud/k8s-manifiestos/volumenes/pvc.yaml
-kubectl apply -f /home/kruz/Trabajo-Cloud/k8s-manifiestos/deployment/deployment.yaml
-kubectl apply -f /home/kruz/Trabajo-Cloud/k8s-manifiestos/service/service.yaml
-kubectl apply -f /home/kruz/Trabajo-Cloud/k8s-manifiestos/ingress/ingress.yaml
+kubectl apply -f /home/kruz/Trabajo-Cloud/Infraestructura/k8s-manifiestos/volumenes/pv.yaml
+kubectl apply -f /home/kruz/Trabajo-Cloud/Infraestructura/k8s-manifiestos/volumenes/pvc.yaml
+kubectl apply -f /home/kruz/Trabajo-Cloud/Infraestructura/k8s-manifiestos/deployment/deployment.yaml
+kubectl apply -f /home/kruz/Trabajo-Cloud/Infraestructura/k8s-manifiestos/service/service.yaml
+kubectl apply -f /home/kruz/Trabajo-Cloud/Infraestructura/k8s-manifiestos/ingress/ingress.yaml
 
 
 Este paso configura los volúmenes persistentes, el despliegue de los pods con Nginx, el servicio para exponer la aplicación y las reglas de Ingress para acceder a la página web.
