@@ -19,7 +19,7 @@ Primero, clonar el repositorio principal del proyecto dentro de una carpeta para
 mkdir ~/Trabajo-Cloud
 cd Trabajo-Cloud
 git clone https://github.com/Juan95Kruz/static-website.git
-git clone https://github.com/Juan95Kruz/Infraestructura
+git clone https://github.com/Juan95Kruz/Infraestructura.git
 
 
 La estructura de tus carpetas debería verse algo así:
