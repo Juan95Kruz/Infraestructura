@@ -1,22 +1,25 @@
 # 🚀 Trabajo 0311AT - Despliegue de Página Web Estática en Minikube
 
-Este proyecto despliega una página web estática en Minikube utilizando Kubernetes y un volumen persistente. El contenido se sincroniza con un repositorio de GitHub y se sirve mediante Nginx.
+Hola! Soy Juan95Kruzy en este proyecto te voy a mostrar cómo desplegar una página web estática usando Minikube, Kubernetes y un volumen persistente.  
+El contenido de la página está sincronizado con un repositorio de GitHub y se sirve a través de Nginx. 🚀
 
 ---
 
-## 📋 Requisitos
+# 📋 Requisitos
 
-- **Minikube**: [Guía de instalación oficial](https://minikube.sigs.k8s.io/docs/).
-- **Kubectl**: [Guía de instalación oficial](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
-- **Docker**: Necesario si utilizas el driver Docker para Minikube.
+Antes de empezar, asegurate de tener instalado lo siguiente:
+
+- **Minikube**: [Guía de instalación](https://minikube.sigs.k8s.io/docs/).
+- **Kubectl**: [Guía de instalación](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
+- **Docker**: [Guía de instalación](https://docs.docker.com/get-docker/) (lo vas a necesitar si usás el driver Docker para Minikube).
 
 ---
 
-## 🛠️ Pasos para desplegar el entorno
+# 🛠️ Pasos para desplegar el entorno
 
-### 1. Clonar los repositorios
+## 1. Clonar los repositorios
 
-Crea una carpeta para trabajar y clona los repositorios:
+Primero creamos una carpeta para trabajar y clonamos los repos:
 
 ```bash
 mkdir ~/Trabajo-Cloud
@@ -25,7 +28,7 @@ git clone https://github.com/Juan95Kruz/static-website.git
 git clone https://github.com/Juan95Kruz/Infraestructura.git
 ```
 
-Estructura esperada:
+Así debería verse la estructura:
 
 ```
 /home/kruz/Trabajo-Cloud
@@ -49,9 +52,9 @@ Estructura esperada:
 
 ---
 
-### 2. Iniciar Minikube con montaje de directorio
+## 2. Iniciar Minikube montando el directorio
 
-Inicia Minikube montando el contenido estático:
+Después vamos a levantar Minikube montando la carpeta de la página web:
 
 ```bash
 minikube start --driver=docker --mount --mount-string="/home/kruz/Trabajo-Cloud/static-website:/mnt/web"
@@ -59,9 +62,9 @@ minikube start --driver=docker --mount --mount-string="/home/kruz/Trabajo-Cloud/
 
 ---
 
-### 3. Aplicar los manifiestos de Kubernetes
+## 3. Aplicar los manifiestos de Kubernetes
 
-Aplica los recursos necesarios:
+Ahora aplicamos todos los manifiestos para desplegar los recursos:
 
 ```bash
 kubectl apply -f /home/kruz/Trabajo-Cloud/Infraestructura/k8s-manifiestos/volumenes/pv.yaml
@@ -73,28 +76,28 @@ kubectl apply -f /home/kruz/Trabajo-Cloud/Infraestructura/k8s-manifiestos/ingres
 
 ---
 
-### 4. Verificar recursos desplegados
+## 4. Verificar que todo esté corriendo
 
-Consulta el estado de los pods y servicios:
+Podés chequear el estado de los pods y servicios así:
 
 ```bash
 kubectl get pods
 kubectl get services
 ```
 
-✅ Asegúrate de que los pods estén en estado `Running` y el servicio correctamente expuesto.
+✅ Asegurate de que los pods estén en estado `Running` y que los servicios estén expuestos correctamente.
 
 ---
 
-### 5. Habilitar Ingress
+## 5. Habilitar el Ingress Controller
 
-Activa el complemento de Ingress en Minikube:
+Si todavía no lo habilitaste, activá el addon de Ingress en Minikube:
 
 ```bash
 minikube addons enable ingress
 ```
 
-Verifica el estado:
+Y después verificá:
 
 ```bash
 kubectl get ingress
@@ -102,37 +105,39 @@ kubectl get ingress
 
 ---
 
-### 6. Configurar el archivo `/etc/hosts`
+## 6. Configurar `/etc/hosts`
 
-Asocia el dominio `sitio.local` a la IP de Minikube:
+Agregamos una entrada en `/etc/hosts` para poder acceder fácilmente:
 
 ```bash
 echo "$(minikube ip) sitio.local" | sudo tee -a /etc/hosts
 ```
 
+Esto permite entrar con el nombre `sitio.local` en el navegador.
+
 ---
 
-### 7. Acceder a la página web
+## 7. Acceder a la página web
 
-Abre en tu navegador:
+Ahora sí, abrí tu navegador y entrá a:
 
 ```text
 http://sitio.local/
 ```
 
-¡Deberías ver tu página web estática servida por Nginx! 🌐
+🎉 ¡Y listo! Deberías ver tu página servida por Nginx con el contenido de tu repositorio.
 
 ---
 
-## 📎 Notas
+# 📎 Notas finales
 
-- Si cambias el usuario (`kruz`) o la ubicación del proyecto, asegúrate de actualizar las rutas en los comandos.
-- Puedes modificar los manifiestos YAML según tus necesidades específicas.
+- Acordate de reemplazar `kruz` por tu nombre de usuario si usás otro.
+- Podés modificar los manifiestos (`deployment.yaml`, `service.yaml`, etc.) si querés ajustar algo de la configuración.
 
 ---
 
-## 🖥️ Autor
+# 🖥️ Autor
 
-- **Juan95Kruz** | [GitHub](https://github.com/Juan95Kruz)
+- **Juan Cruz** | [GitHub](https://github.com/Juan95Kruz)
 
 ---
