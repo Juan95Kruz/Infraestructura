@@ -1,6 +1,6 @@
 # 🚀 Trabajo 0311AT - Despliegue de Página Web Estática en Minikube
 
-Hola! Soy Juan95Kruzy en este proyecto te voy a mostrar cómo desplegar una página web estática usando Minikube, Kubernetes y un volumen persistente.  
+Hola! Soy Juan95Kruz y en este proyecto te voy a mostrar cómo desplegar una página web estática usando Minikube, Kubernetes y un volumen persistente.  
 El contenido de la página está sincronizado con un repositorio de GitHub y se sirve a través de Nginx. 🚀
 
 ---
@@ -131,8 +131,8 @@ http://sitio.local/
 
 # 📎 Notas finales
 
-- Acordate de reemplazar `kruz` por tu nombre de usuario si usás otro.
-- Podés modificar los manifiestos (`deployment.yaml`, `service.yaml`, etc.) si querés ajustar algo de la configuración.
+- Acordate de reemplazar `kruz` por tu nombre de usuario si usas otro, también no te olvides de usar el nombre de tu carpeta creada.
+- Podes modificar los manifiestos (`deployment.yaml`, `service.yaml`, etc.) si querés ajustar algo de la configuración.
 
 ---
 
