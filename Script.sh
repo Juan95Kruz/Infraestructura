@@ -128,8 +128,11 @@ function verificar_todos_los_recursos() {
 function configurar_hosts() {
     echo "🌐 Configurando acceso a sitio.local..."
     IP_MINIKUBE=$(minikube ip)
+    IP_HOSTS=$(grep "sitio.local" /etc/hosts | awk '{print $1}')
 
-    if grep -q "sitio.local" /etc/hosts; then
+    if [ "$IP_HOSTS" == "$IP_MINIKUBE" ]; then
+        echo "✅ La IP en /etc/hosts ya está actualizada. No es necesario hacer cambios."
+    elif grep -q "sitio.local" /etc/hosts; then
         echo "⚙️ Actualizando IP de 'sitio.local' en /etc/hosts..."
         sudo sed -i.bak "/sitio.local/c\\$IP_MINIKUBE sitio.local" /etc/hosts
         echo "✅ IP actualizada exitosamente."
@@ -139,6 +142,7 @@ function configurar_hosts() {
         echo "✅ Agregado exitosamente."
     fi
 }
+
 
 
 function verificar_pagina() {
