@@ -7,10 +7,10 @@
 # Descripción: Automatiza el despliegue de una web estática en Minikube con verificaciones completas
 # -------------------------------------------
 
-set -euo pipefail
+set -euo pipefail  # Hace que el script falle ante errores o variables no definidas
 
 # --- Configuración ---
-WORKDIR="${1:-$HOME/Trabajo-Cloud}"
+WORKDIR="${1:-$HOME/Trabajo-Cloud}"  # Carpeta de trabajo, por defecto en el home
 REPO_WEB="https://github.com/Juan95Kruz/static-website.git"
 REPO_INFRA="https://github.com/Juan95Kruz/Infraestructura.git"
 MOUNT_SOURCE="$WORKDIR/static-website"
@@ -69,6 +69,7 @@ function aplicar_manifiestos() {
 function verificar_todos_los_recursos() {
     echo "🔍 Verificando todos los recursos del cluster..."
 
+    # Verifica que los PVs estén en estado Bound
     for pv in $(kubectl get pv -o jsonpath='{.items[*].metadata.name}'); do
         echo "🔄 Verificando PV '$pv'..."
         for i in {1..24}; do
@@ -88,6 +89,7 @@ function verificar_todos_los_recursos() {
         done
     done
 
+    # Verifica que los PVCs estén en estado Bound
     for pvc in $(kubectl get pvc -o jsonpath='{.items[*].metadata.name}'); do
         echo "🔄 Verificando PVC '$pvc'..."
         for i in {1..24}; do
@@ -107,16 +109,19 @@ function verificar_todos_los_recursos() {
         done
     done
 
+    # Verifica que los deployments estén listos
     for deploy in $(kubectl get deploy -o jsonpath='{.items[*].metadata.name}'); do
         echo "🔄 Verificando Deployment '$deploy'..."
         kubectl rollout status deploy "$deploy" --timeout=180s
     done
 
+    # Muestra los services desplegados
     for svc in $(kubectl get svc -o jsonpath='{.items[*].metadata.name}'); do
         echo "🔄 Verificando Service '$svc'..."
         kubectl get svc "$svc"
     done
 
+    # Muestra los ingress creados
     for ing in $(kubectl get ingress -o jsonpath='{.items[*].metadata.name}'); do
         echo "🔄 Verificando Ingress '$ing'..."
         kubectl get ingress "$ing"
@@ -130,20 +135,41 @@ function configurar_hosts() {
     IP_MINIKUBE=$(minikube ip)
     IP_HOSTS=$(grep "sitio.local" /etc/hosts | awk '{print $1}')
 
+    echo "👉 IP actual de Minikube: $IP_MINIKUBE"
+    echo "👉 IP en /etc/hosts: $IP_HOSTS"
+
+    read -p "¿Querés actualizar /etc/hosts si es necesario? (s/n): " confirmacion
+    if [[ $confirmacion != "s" ]]; then
+        echo "🚫 Operación cancelada por el usuario."
+        return
+    fi
+
     if [ "$IP_HOSTS" == "$IP_MINIKUBE" ]; then
-        echo "✅ La IP en /etc/hosts ya está actualizada. No es necesario hacer cambios."
+        echo "✅ La IP en /etc/hosts ya está actualizada."
     elif grep -q "sitio.local" /etc/hosts; then
-        echo "⚙️ Actualizando IP de 'sitio.local' en /etc/hosts..."
+        echo "⚙️ Actualizando IP en /etc/hosts..."
         sudo sed -i.bak "/sitio.local/c\\$IP_MINIKUBE sitio.local" /etc/hosts
-        echo "✅ IP actualizada exitosamente."
+        echo "✅ IP actualizada."
     else
         echo "🔧 Agregando 'sitio.local' a /etc/hosts..."
         echo "$IP_MINIKUBE sitio.local" | sudo tee -a /etc/hosts >/dev/null
         echo "✅ Agregado exitosamente."
     fi
+
+    if command -v dig >/dev/null 2>&1; then
+        IP_RESOLVED=$(dig +short sitio.local)
+    else
+        IP_RESOLVED=$(host sitio.local | awk '/has address/ {print $4}')
+    fi
+
+    echo "🔍 Verificación DNS: sitio.local → $IP_RESOLVED"
+
+    if [ "$IP_RESOLVED" == "$IP_MINIKUBE" ]; then
+        echo "✅ Verificación exitosa: sitio.local resuelve a $IP_MINIKUBE"
+    else
+        echo "⚠️ Advertencia: sitio.local no resuelve correctamente. Revisá /etc/hosts."
+    fi
 }
-
-
 
 function verificar_pagina() {
     echo "🌍 Verificando que la página esté disponible..."
@@ -163,15 +189,15 @@ function verificar_pagina() {
 # --- Ejecución principal ---
 echo "🌟 Script de despliegue iniciado..."
 
-validar_dependencias
-clonar_repositorios
-iniciar_minikube
-habilitar_ingress
-esperar_ingress_ready
-aplicar_manifiestos
-verificar_todos_los_recursos
-configurar_hosts
-verificar_pagina
+validar_dependencias      # Chequea que estén instaladas las herramientas necesarias
+clonar_repositorios       # Baja los repos si no existen
+iniciar_minikube          # Levanta Minikube con configuración de montaje
+habilitar_ingress         # Activa Ingress si no está habilitado
+esperar_ingress_ready     # Espera a que Ingress esté listo
+aplicar_manifiestos       # Aplica los archivos YAML del cluster
+verificar_todos_los_recursos  # Comprueba que todo esté funcionando bien
+configurar_hosts          # Configura el acceso local por nombre
+verificar_pagina          # Chequea que la web responda correctamente
 
 echo ""
 echo "🎉 ¡Despliegue completado exitosamente!"
