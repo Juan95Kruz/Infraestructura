@@ -125,19 +125,21 @@ function verificar_todos_los_recursos() {
     echo "✅ Todos los recursos verificados correctamente."
 }
 
-
 function configurar_hosts() {
     echo "🌐 Configurando acceso a sitio.local..."
     IP_MINIKUBE=$(minikube ip)
 
     if grep -q "sitio.local" /etc/hosts; then
-        echo "⚙️ 'sitio.local' ya existe en /etc/hosts."
+        echo "⚙️ Actualizando IP de 'sitio.local' en /etc/hosts..."
+        sudo sed -i.bak "/sitio.local/c\\$IP_MINIKUBE sitio.local" /etc/hosts
+        echo "✅ IP actualizada exitosamente."
     else
         echo "🔧 Agregando 'sitio.local' a /etc/hosts..."
         echo "$IP_MINIKUBE sitio.local" | sudo tee -a /etc/hosts >/dev/null
         echo "✅ Agregado exitosamente."
     fi
 }
+
 
 function verificar_pagina() {
     echo "🌍 Verificando que la página esté disponible..."
