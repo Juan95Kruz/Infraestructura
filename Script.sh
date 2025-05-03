@@ -1,17 +1,15 @@
 #!/bin/bash
-
 # -------------------------------------------
 # Script: deploy.sh
-# Despliegue automatico - 0505AT - Script de Despliegue - ITU UNCuyo
-# Autor: Juan Cruz (Con ayudita de ChanguITU)
+# Despliegue automático - 0505AT - Script de Despliegue - ITU UNCuyo
+# Autor: Juan Cruz (con ayudita de ChanguITU)
 # Fecha: 2025-04-28
-# Descripcion: Automatiza el despliegue de una web estatica en Minikube
+# Descripción: Automatiza el despliegue de una web estática en Minikube con verificaciones completas
 # -------------------------------------------
 
-# --- Fail fast ---
 set -euo pipefail
 
-# --- Configuracion ---
+# --- Configuración ---
 WORKDIR="${1:-$HOME/Trabajo-Cloud}"
 REPO_WEB="https://github.com/Juan95Kruz/static-website.git"
 REPO_INFRA="https://github.com/Juan95Kruz/Infraestructura.git"
@@ -22,9 +20,9 @@ MANIFESTS_DIR="$WORKDIR/Infraestructura/k8s-manifiestos"
 # --- Funciones auxiliares ---
 function validar_dependencias() {
     echo "🔍 Validando dependencias..."
-    for cmd in git minikube kubectl; do
+    for cmd in git minikube kubectl curl; do
         if ! command -v "$cmd" &>/dev/null; then
-            echo "❌ Error: '$cmd' no encontrado. Instalalo antes de continuar."
+            echo "❌ Error: '$cmd' no encontrado. Instálalo antes de continuar."
             exit 1
         fi
     done
@@ -35,17 +33,8 @@ function clonar_repositorios() {
     mkdir -p "$WORKDIR"
     cd "$WORKDIR"
 
-    if [ ! -d "static-website" ]; then
-        git clone "$REPO_WEB"
-    else
-        echo "📂 Repositorio 'static-website' ya existe, omitiendo clonado."
-    fi
-
-    if [ ! -d "Infraestructura" ]; then
-        git clone "$REPO_INFRA"
-    else
-        echo "📂 Repositorio 'Infraestructura' ya existe, omitiendo clonado."
-    fi
+    [ ! -d "static-website" ] && git clone "$REPO_WEB" || echo "📂 Repositorio 'static-website' ya existe, omitiendo clonado."
+    [ ! -d "Infraestructura" ] && git clone "$REPO_INFRA" || echo "📂 Repositorio 'Infraestructura' ya existe, omitiendo clonado."
 }
 
 function iniciar_minikube() {
@@ -57,6 +46,17 @@ function iniciar_minikube() {
     fi
 }
 
+function habilitar_ingress() {
+    echo "🌐 Verificando estado del addon Ingress..."
+    minikube addons enable ingress 2>/dev/null || echo "✅ Addon 'ingress' ya estaba habilitado."
+}
+
+function esperar_ingress_ready() {
+    echo "⏳ Esperando que el Ingress Controller esté listo..."
+    kubectl rollout status deployment ingress-nginx-controller -n ingress-nginx --timeout=180s
+    echo "✅ Ingress Controller listo."
+}
+
 function aplicar_manifiestos() {
     echo "📜 Aplicando manifiestos de Kubernetes..."
     kubectl apply -f "$MANIFESTS_DIR/volumenes/pv.yaml"
@@ -66,47 +66,47 @@ function aplicar_manifiestos() {
     kubectl apply -f "$MANIFESTS_DIR/ingress/ingress.yaml"
 }
 
-function habilitar_ingress() {
-    echo "🌐 Verificando estado del addon Ingress..."
+function verificar_recursos() {
+    echo "✅ Verificando estado de los recursos..."
 
-    if minikube addons list | grep ingress | grep -q enabled; then
-        echo "✅ El addon 'ingress' ya está habilitado."
-    else
-        echo "🚀 Habilitando el addon 'ingress' en Minikube..."
-        minikube addons enable ingress
-    fi
+    echo "🔄 Esperando que el PVC esté Bound..."
+    kubectl wait --for=condition=Bound pvc --all --timeout=60s
+
+    echo "🔄 Esperando que el Pod esté Running..."
+    kubectl wait --for=condition=Ready pod --all --timeout=120s
+
+    echo "✅ PVC y Pod listos."
 }
 
-function esperar_ingress_ready() {
-    echo "⏳ Esperando que el Ingress Controller esté listo..."
-
-    # Esperar hasta que el deployment del Ingress esté disponible
-    kubectl rollout status deployment ingress-nginx-controller -n ingress-nginx --timeout=120s
-
-    echo "✅ Ingress Controller listo."
-}
-
-function mostrar_url() {
+function configurar_hosts() {
     echo "🌐 Configurando acceso a sitio.local..."
-
     IP_MINIKUBE=$(minikube ip)
 
-    # Verificar si ya existe una entrada para sitio.local
     if grep -q "sitio.local" /etc/hosts; then
-        echo "⚙️ 'sitio.local' ya existe en /etc/hosts. No se modifica."
+        echo "⚙️ 'sitio.local' ya existe en /etc/hosts."
     else
         echo "🔧 Agregando 'sitio.local' a /etc/hosts..."
-        echo "$IP_MINIKUBE sitio.local" | sudo tee -a /etc/hosts
+        echo "$IP_MINIKUBE sitio.local" | sudo tee -a /etc/hosts >/dev/null
         echo "✅ Agregado exitosamente."
     fi
-
-    echo ""
-    echo "🔗 Tu sitio web estatico esta disponible en:"
-    echo "👉 http://sitio.local/"
 }
 
-# --- Ejecucion ---
+function verificar_pagina() {
+    echo "🌍 Verificando que la página esté disponible..."
+    for i in {1..10}; do
+        if curl -s -o /dev/null -w "%{http_code}" http://sitio.local/ | grep -q "200"; then
+            echo "✅ Página responde correctamente (HTTP 200)."
+            return
+        else
+            echo "⏳ Esperando que la página responda... ($i/10)"
+            sleep 5
+        fi
+    done
+    echo "❌ La página no respondió correctamente tras varios intentos."
+    exit 1
+}
 
+# --- Ejecución principal ---
 echo "🌟 Script de despliegue iniciado..."
 
 validar_dependencias
@@ -115,9 +115,11 @@ iniciar_minikube
 habilitar_ingress
 esperar_ingress_ready
 aplicar_manifiestos
-mostrar_url
+verificar_recursos
+configurar_hosts
+verificar_pagina
 
-echo "✅ Despliegue completado exitosamente. ¡Listo para navegar!"
-
-
+echo ""
+echo "🎉 ¡Despliegue completado exitosamente!"
+echo "👉 Accedé a tu sitio en: http://sitio.local/"
 
