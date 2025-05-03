@@ -69,14 +69,20 @@ function aplicar_manifiestos() {
 function verificar_recursos() {
     echo "✅ Verificando estado de los recursos..."
 
-    echo "🔄 Esperando que el PVC esté Bound..."
-    kubectl wait --for=condition=Bound pvc --all --timeout=60s
+    PVC_STATUS=$(kubectl get pvc sitio-pvc -o jsonpath='{.status.phase}')
+    if [[ "$PVC_STATUS" != "Bound" ]]; then
+        echo "🔄 Esperando que el PVC esté Bound..."
+        kubectl wait --for=condition=Bound pvc --all --timeout=120s
+    else
+        echo "✅ PVC ya está en Bound."
+    fi
 
     echo "🔄 Esperando que el Pod esté Running..."
     kubectl wait --for=condition=Ready pod --all --timeout=120s
 
     echo "✅ PVC y Pod listos."
 }
+
 
 function configurar_hosts() {
     echo "🌐 Configurando acceso a sitio.local..."
