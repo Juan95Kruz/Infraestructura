@@ -82,6 +82,7 @@ function verificar_todos_los_recursos() {
             fi
             if [[ $i -eq 24 ]]; then
                 echo "❌ PV '$pv' no alcanzó la fase 'Bound'."
+                kubectl describe pv "$pv"
                 exit 1
             fi
         done
@@ -89,7 +90,21 @@ function verificar_todos_los_recursos() {
 
     for pvc in $(kubectl get pvc -o jsonpath='{.items[*].metadata.name}'); do
         echo "🔄 Verificando PVC '$pvc'..."
-        kubectl wait pvc "$pvc" --for=condition=Bound --timeout=120s
+        for i in {1..24}; do
+            phase=$(kubectl get pvc "$pvc" -o jsonpath='{.status.phase}')
+            if [[ "$phase" == "Bound" ]]; then
+                echo "✅ PVC '$pvc' está Bound."
+                break
+            else
+                echo "⏳ PVC '$pvc' está en fase '$phase'... esperando... ($i/24)"
+                sleep 5
+            fi
+            if [[ $i -eq 24 ]]; then
+                echo "❌ PVC '$pvc' no alcanzó la fase 'Bound'."
+                kubectl describe pvc "$pvc"
+                exit 1
+            fi
+        done
     done
 
     for deploy in $(kubectl get deploy -o jsonpath='{.items[*].metadata.name}'); do
@@ -109,6 +124,7 @@ function verificar_todos_los_recursos() {
 
     echo "✅ Todos los recursos verificados correctamente."
 }
+
 
 function configurar_hosts() {
     echo "🌐 Configurando acceso a sitio.local..."
