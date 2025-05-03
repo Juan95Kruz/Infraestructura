@@ -135,7 +135,7 @@ iniciar_minikube
 habilitar_ingress
 esperar_ingress_ready
 aplicar_manifiestos
-verificar_recursos
+verificar_todos_los_recursos
 configurar_hosts
 verificar_pagina
 
