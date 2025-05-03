@@ -66,21 +66,35 @@ function aplicar_manifiestos() {
     kubectl apply -f "$MANIFESTS_DIR/ingress/ingress.yaml"
 }
 
-function verificar_recursos() {
-    echo "✅ Verificando estado de los recursos..."
+function verificar_todos_los_recursos() {
+    echo "🔍 Verificando todos los recursos del cluster..."
 
-    PVC_STATUS=$(kubectl get pvc sitio-pvc -o jsonpath='{.status.phase}')
-    if [[ "$PVC_STATUS" != "Bound" ]]; then
-        echo "🔄 Esperando que el PVC esté Bound..."
-        kubectl wait --for=condition=Bound pvc --all --timeout=120s
-    else
-        echo "✅ PVC ya está en Bound."
-    fi
+    for pv in $(kubectl get pv -o jsonpath='{.items[*].metadata.name}'); do
+        echo "🔄 Verificando PV '$pv'..."
+        kubectl wait pv "$pv" --for=phase=Bound --timeout=120s
+    done
 
-    echo "🔄 Esperando que el Pod esté Running..."
-    kubectl wait --for=condition=Ready pod --all --timeout=120s
+    for pvc in $(kubectl get pvc -o jsonpath='{.items[*].metadata.name}'); do
+        echo "🔄 Verificando PVC '$pvc'..."
+        kubectl wait pvc "$pvc" --for=condition=Bound --timeout=120s
+    done
 
-    echo "✅ PVC y Pod listos."
+    for deploy in $(kubectl get deploy -o jsonpath='{.items[*].metadata.name}'); do
+        echo "🔄 Verificando Deployment '$deploy'..."
+        kubectl rollout status deploy "$deploy" --timeout=180s
+    done
+
+    for svc in $(kubectl get svc -o jsonpath='{.items[*].metadata.name}'); do
+        echo "🔄 Verificando Service '$svc'..."
+        kubectl get svc "$svc"
+    done
+
+    for ing in $(kubectl get ingress -o jsonpath='{.items[*].metadata.name}'); do
+        echo "🔄 Verificando Ingress '$ing'..."
+        kubectl get ingress "$ing"
+    done
+
+    echo "✅ Todos los recursos verificados correctamente."
 }
 
 
