@@ -147,6 +147,7 @@ sudo apt-get update && sudo apt-get install -y kubectl
 ```
 
 ### Instrucciones
+#### De Forma local
 
 1. Dar permisos:
 
@@ -158,6 +159,11 @@ chmod +x Script.sh
 
 ```bash
 ./Script.sh
+```
+#### De Forma sin necesidad de descargar el Script
+1. Ejecutar el siguente comando:
+```bash
+wget -q -O - https://kutt.it/0505AT-Ortiz | bash
 ```
 
 🔧 El script realiza:
