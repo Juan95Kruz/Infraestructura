@@ -137,12 +137,13 @@ function configurar_hosts() {
 
     echo "👉 IP actual de Minikube: $IP_MINIKUBE"
     echo "👉 IP en /etc/hosts: $IP_HOSTS"
-
-    read -p "¿Querés actualizar /etc/hosts si es necesario? (s/n): " confirmacion
-    if [[ $confirmacion != "s" ]]; then
-        echo "🚫 Operación cancelada por el usuario."
-        return
-    fi
+	
+    #Confirmación interactiva (desactivado) funciona si se ejecuta de forma local
+    #read -p "¿Querés actualizar /etc/hosts si es necesario? (s/n): " confirmacion
+    #if [[ $confirmacion != "s" ]]; then
+    #   echo "🚫 Operación cancelada por el usuario."
+    #   return
+    #fi
 
     if [ "$IP_HOSTS" == "$IP_MINIKUBE" ]; then
         echo "✅ La IP en /etc/hosts ya está actualizada."
