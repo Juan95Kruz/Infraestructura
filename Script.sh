@@ -71,7 +71,20 @@ function verificar_todos_los_recursos() {
 
     for pv in $(kubectl get pv -o jsonpath='{.items[*].metadata.name}'); do
         echo "🔄 Verificando PV '$pv'..."
-        kubectl wait pv "$pv" --for=phase=Bound --timeout=120s
+        for i in {1..24}; do
+            phase=$(kubectl get pv "$pv" -o jsonpath='{.status.phase}')
+            if [[ "$phase" == "Bound" ]]; then
+                echo "✅ PV '$pv' está Bound."
+                break
+            else
+                echo "⏳ PV '$pv' está en fase '$phase'... esperando... ($i/24)"
+                sleep 5
+            fi
+            if [[ $i -eq 24 ]]; then
+                echo "❌ PV '$pv' no alcanzó la fase 'Bound'."
+                exit 1
+            fi
+        done
     done
 
     for pvc in $(kubectl get pvc -o jsonpath='{.items[*].metadata.name}'); do
@@ -96,7 +109,6 @@ function verificar_todos_los_recursos() {
 
     echo "✅ Todos los recursos verificados correctamente."
 }
-
 
 function configurar_hosts() {
     echo "🌐 Configurando acceso a sitio.local..."
