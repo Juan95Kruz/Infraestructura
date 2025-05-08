@@ -21,6 +21,7 @@ Antes de empezar, asegurate de tener instalado lo siguiente:
 ## 1. Clonar los repositorios
 
 Primero creamos una carpeta para trabajar y clonamos los repos:
+Asegurate de usar tus propias carpetas y direcciones 
 
 ```bash
 mkdir ~/Trabajo-Cloud
@@ -108,7 +109,6 @@ http://sitio.local/
 ```
 
 🎉 ¡Y listo! Deberías ver tu página servida por Nginx con el contenido de tu repositorio.
- Asegurate de usar tus propias carpetas y direcciones 
 
 ---
 
