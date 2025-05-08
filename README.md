@@ -108,6 +108,7 @@ http://sitio.local/
 ```
 
 🎉 ¡Y listo! Deberías ver tu página servida por Nginx con el contenido de tu repositorio.
+ Asegurate de usar tus propias carpetas y direcciones 
 
 ---
 
